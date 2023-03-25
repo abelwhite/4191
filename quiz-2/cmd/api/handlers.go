@@ -41,18 +41,14 @@ func (app *application) showCoursesHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	//fmt.Fprintf(w, "Show details of school %d \n ", id)
+	//fmt.Fprintf(w, "Show details of Courses %d \n ", id)
 	course := data.Course{
-		ID:        id,
-		CreatedAt: time.Now(),
-		Name:      "University of Belmopan",
-		Level:     "University",
-		Contact:   "Abel Blanco",
-		Phone:     "323-4545",
-		Website:   "https://uob.edu.bz",
-		Address:   "17 Apple Avenue",
-		Mode:      []string{"blended", "online", "face-to-face"},
-		Version:   1,
+		ID:           id,
+		CreatedAt:    time.Now(),
+		CourseCode:   "CMPS142",
+		CourseTitle:  "Principles of Programming",
+		CourseCredit: "3",
+		Version:      1,
 	}
 	err = app.WriteJSON(w, http.StatusOK, envelope{"course": course}, nil)
 	if err != nil {

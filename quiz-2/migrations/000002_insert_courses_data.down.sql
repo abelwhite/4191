@@ -1,1 +1,1 @@
-DELETE FROM schools;
+DELETE FROM courses;
