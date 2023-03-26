@@ -13,9 +13,14 @@ func (app *application) createCoursesHandler(w http.ResponseWriter, r *http.Requ
 	//create a struct to hold a school that will be provided to us
 	//via the request
 	var input struct {
-		CourseCode   string `json:"course_code"`
-		CourseTitle  string `json:"course_title"`
-		CourseCredit string `json:"course_credit"`
+		Name    string   `json:"name"`
+		Level   string   `json:"level"`
+		Contact string   `json:"contact"`
+		Phone   string   `json:"phone"`
+		Email   string   `json:"email"`
+		Website string   `json:"website,omitempty"`
+		Address string   `json:"address"`
+		Mode    []string `json:"mode"`
 	}
 	//Decode the JSON request
 	err := app.readJSON(w, r, &input) //we take r.Body and decode it into input
