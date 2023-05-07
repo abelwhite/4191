@@ -1,0 +1,7 @@
+Method    URL Pattern        Handler Name           Description
+GET       /v1/healthcheck    healthcheckHandler     shows app info
+GET       /v1/courses        listCourseHandler      shows the details of all courses
+POST      /v1/courses        createCourseHandler    create a new course
+GET       /v1/courses/:id    showCourseHandler      show details of a specific course 
+PUT       /v1/courses/:id    editCourseHandler      update the  details of a specific course 
+DELETE    /v1/courses/:id    deleteCourseHandler    delete a specific course
