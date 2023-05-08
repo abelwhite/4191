@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -13,9 +14,9 @@ func (app *application) createCourseHandler(w http.ResponseWriter, r *http.Reque
 	// create a struct to hold a input that will be provided to us
 	// via the request
 	var input struct {
-		CourseCode   string `json:"name"`
-		CourseTitle  string `json:"level"`
-		CourseCredit string `json:"contact"`
+		CourseCode   string `json:"course_code"`
+		CourseTitle  string `json:"course_title"`
+		CourseCredit string `json:"course_Credit"`
 	}
 	// decode our the JSON request
 	err := app.readJSON(w, r, &input)
@@ -23,7 +24,7 @@ func (app *application) createCourseHandler(w http.ResponseWriter, r *http.Reque
 		app.badRequestResponse(w, r, err)
 		return
 	}
-	// Copy the values from the input struct to the new School struct
+	// Copy the values from the input struct to the new course struct
 	course := &data.Course{
 		CourseCode:   input.CourseCode,
 		CourseTitle:  input.CourseTitle,
@@ -60,88 +61,103 @@ func (app *application) createCourseHandler(w http.ResponseWriter, r *http.Reque
 	// }
 }
 
-// func (app *application) showSchoolHandler(w http.ResponseWriter, r *http.Request) {
-// 	id, err := app.readIDParams(r)
-// 	if err != nil {
-// 		app.notFoundResponse(w, r)
-// 		return
-// 	}
-// 	//fetch the school with the associated idea id
-// 	school, err := app.models.Schools.Get(id)
-// 	if err != nil {
-// 		switch {
-// 		case errors.Is(err, data.ErrRecordNotFound):
-// 			app.notFoundResponse(w, r)
-// 		default:
-// 			app.serverErrorResponse(w, r, err)
-// 		}
-// 		return
-// 	}
-// 	err = app.writeJSON(w, http.StatusOK, envelope{"school": school}, nil)
-// 	if err != nil {
-// 		app.serverErrorResponse(w, r, err)
-// 		return
-// 	}
-// }
+func (app *application) showCourseHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParams(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+	//fetch the school with the associated idea id
+	course, err := app.models.Courses.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	err = app.writeJSON(w, http.StatusOK, envelope{"course": course}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+}
 
-// func (app *application) updateSchoolHandler(w http.ResponseWriter, r *http.Request) {
-// 	id, err := app.readIDParams(r)
-// 	if err != nil {
-// 		app.notFoundResponse(w, r)
-// 		return
-// 	}
-// 	//fetch the original School
-// 	school, err := app.models.Schools.Get(id)
-// 	if err != nil {
-// 		switch {
-// 		case errors.Is(err, data.ErrRecordNotFound):
-// 			app.notFoundResponse(w, r)
-// 		default:
-// 			app.serverErrorResponse(w, r, err)
-// 		}
-// 		return
-// 	}
+func (app *application) updateCourseHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParams(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+	//fetch the original School
+	course, err := app.models.Courses.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	//create an input to hold the read in from fetch client
+	var input struct {
+		CourseCode   string `json:"course_code"`
+		CourseTitle  string `json:"course_title"`
+		CourseCredit string `json:"course_credit"`
+	}
+	// decode our the JSON request
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	} //Update the original course
+	//with the new course
+	course.CourseCode = input.CourseCode
+	course.CourseTitle = input.CourseTitle
+	course.CourseCredit = input.CourseCredit
 
-// 	var input struct {
-// 		Name    string   `json:"name"`
-// 		Level   string   `json:"level"`
-// 		Contact string   `json:"contact"`
-// 		Phone   string   `json:"phone"`
-// 		Email   string   `json:"email"`
-// 		Website string   `json:"website"`
-// 		Address string   `json:"address"`
-// 		Mode    []string `json:"mode"`
-// 	}
-// 	// decode our the JSON request
-// 	err = app.readJSON(w, r, &input)
-// 	if err != nil {
-// 		app.badRequestResponse(w, r, err)
-// 		return
-// 	} //Update the original school
-// 	//with the new school
-// 	school.Name = input.Name
-// 	school.Level = input.Level
-// 	school.Contact = input.Contact
-// 	school.Phone = input.Phone
-// 	school.Email = input.Email
-// 	school.Website = input.Website
-// 	school.Address = input.Address
-// 	school.Mode = input.Mode
-// 	// let's validate our JSON input
-// 	v := validator.New()
-// 	// Check for validation errrors
-// 	if data.ValidateSchool(v, school); !v.Valid() {
-// 		app.failedValidationResponse(w, r, v.Errors)
-// 		return
-// 	}
-// 	//perform the update
-// 	err = app.models.Schools.Update(school)
-// 	if err != nil {
-// 		app.serverErrorResponse(w, r, err)
-// 		return
-// 	} //write the response
-// 	err = app.writeJSON(w, http.StatusOK, envelope{"school": school}, nil)
-// 	if err != nil {
-// 		app.serverErrorResponse(w, r, err)
-// 	}
-// }
+	// let's validate our JSON input
+	v := validator.New()
+	// Check for validation errrors
+	if data.ValidateCourse(v, course); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+	//perform the update
+	err = app.models.Courses.Update(course)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	} //write the response
+	err = app.writeJSON(w, http.StatusOK, envelope{"course": course}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) deleteCourseHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParams(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+	//delete the schools from the database
+	err = app.models.Courses.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	//if no errors then deletion was succesfull
+	err = app.writeJSON(w,http.StatusOK, envelope{"message":"courses was deleted successful"}, nil)
+	if err != nil{
+		app.serverErrorResponse(w, r, err)
+	}
+}

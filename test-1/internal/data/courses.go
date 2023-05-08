@@ -20,13 +20,13 @@ type Course struct {
 
 func ValidateCourse(v *validator.Validator, course *Course) {
 	// Use the Check() method to execute our validation checks
-	v.Check(course.CourseCode != "", "code", "must be provided")
+	v.Check(course.CourseCode != "", "course_code", "must be provided")
 	v.Check(len(course.CourseCode) <= 200, "name", "must not be more than 200 bytes long")
 
-	v.Check(course.CourseTitle != "", "title", "must be provided")
+	v.Check(course.CourseTitle != "", "course_title", "must be provided")
 	v.Check(len(course.CourseTitle) <= 200, "level", "must not be more than 200 bytes long")
 
-	v.Check(course.CourseCredit != "", "credit", "must be provided")
+	v.Check(course.CourseCredit != "", "course_credit", "must be provided")
 	v.Check(len(course.CourseCredit) <= 200, "contact", "must not be more than 200 bytes long")
 }
 
@@ -68,10 +68,10 @@ func (m CourseModel) Get(id int64) (*Course, error) {
 	var course Course
 	err := m.DB.QueryRow(query, id).Scan(
 		&course.ID,
+		&course.CreatedAt,
 		&course.CourseCode,
 		&course.CourseTitle,
 		&course.CourseCredit,
-		&course.CreatedAt,
 		&course.Version,
 	)
 
@@ -94,10 +94,9 @@ func (m CourseModel) Get(id int64) (*Course, error) {
 func (m CourseModel) Update(course *Course) error {
 	//create
 	query := `
-		UPDATE schools 
-		SET name = $1, level = $2, content = $3, phone = $4, email = $5, website = $6, 
-		address = $7, mode = $8, version = version + 1
-		WHERE id = $9
+		UPDATE courses 
+		SET course_code = $1, course_title = $2, course_credit = $3, version = version + 1
+		WHERE id = $4
 		RETURNING version 
 		`
 	args := []interface{}{
@@ -111,5 +110,28 @@ func (m CourseModel) Update(course *Course) error {
 
 // delete school data
 func (m CourseModel) Delete(id int64) error {
+	if id < 1 {
+		return ErrRecordNotFound
+	}
+	//create the delete query
+	query := `
+	DELETE FROM courses
+	WHERE id =$1
+	`
+	//execute the query
+	result, err := m.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	//check how many rows were affected
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	//check if 0 rows affected
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
 	return nil
+
 }
