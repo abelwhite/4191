@@ -137,7 +137,12 @@ func (app *application) updateCourseHandler(w http.ResponseWriter, r *http.Reque
 	//perform the update
 	err = app.models.Courses.Update(course)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch{
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	} //write the response
 	err = app.writeJSON(w, http.StatusOK, envelope{"course": course}, nil)

@@ -14,3 +14,4 @@ curl -X DELETE -d "$BODY" localhost:4000/v1/courses/1
 test partial update, we use patch now
 curl -X PATCH -d '{"course_code":"CMPS111"}' localhost:4000/v1/courses/1
 
+xargs -I% -P 8 curl -X PATCH -d '{"course_code":"PRCP123"}' "localhost:4000/v1/courses/1" < <(printf '%s\n' {1..9})

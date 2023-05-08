@@ -90,13 +90,15 @@ func (m CourseModel) Get(id int64) (*Course, error) {
 
 }
 
-// update school data
+// update school data with fixed DATA RACES
+// optimistc locking in the version number
 func (m CourseModel) Update(course *Course) error {
 	//create
 	query := `
 		UPDATE courses 
 		SET course_code = $1, course_title = $2, course_credit = $3, version = version + 1
 		WHERE id = $4
+		AND version =$5
 		RETURNING version 
 		`
 	args := []interface{}{
@@ -104,8 +106,19 @@ func (m CourseModel) Update(course *Course) error {
 		course.CourseTitle,
 		course.CourseCredit,
 		course.ID,
+		course.Version, //we want to keep a check in version to make sure it hasnt changed
 	}
-	return m.DB.QueryRow(query, args...).Scan(&course.Version)
+	//check for edit conflicts
+	err := m.DB.QueryRow(query, args...).Scan(&course.Version)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows): //tells me no rows was return
+			return ErrEditConflict
+		default:
+			return err
+		}
+	}
+	return nil
 }
 
 // delete school data
