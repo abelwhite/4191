@@ -1,0 +1,16 @@
+BODY='{"course_code":"CMPS123","course_title":"Principles of Programming","course_credit":"3" }'
+
+curl -i -d "$BODY" localhost:4000/v1/courses
+
+
+curl -i localhost:4000/v1/courses/1
+
+BODY='{"course_code":"CMPS321","course_title":"Principles of Programming","course_credit":"3" }'
+curl -X PUT -d "$BODY" localhost:4000/v1/courses/1
+
+for delete:
+curl -X DELETE -d "$BODY" localhost:4000/v1/courses/1
+
+test partial update, we use patch now
+curl -X PATCH -d '{"course_code":"CMPS111"}' localhost:4000/v1/courses/1
+
